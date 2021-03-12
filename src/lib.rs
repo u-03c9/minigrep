@@ -1,3 +1,7 @@
+//! # minigrep
+//!
+//! `minigrep` is a collection of utilities to make performing searches
+//! on an input file
 use std::env;
 use std::error::Error;
 use std::fs;
@@ -32,6 +36,21 @@ impl Config {
     }
 }
 
+/// Starts the search given a Config struct containing the pattern
+/// and the file name, and then prints out the results.
+///
+/// ## Panics
+/// It could panic if the file doesn't exist or unable to read.
+/// ```
+/// let config = minigrep::Config{
+///     query: "to".to_string(),
+///     filename: "file_that_does_not_exists.txt".to_string(),
+///     case_sensitive: false,
+/// };
+///
+/// assert!(minigrep::run(config).is_err());
+///
+/// ```
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.filename)?;
 
@@ -48,6 +67,18 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+/// Searches for the query in contents with case sensitivity.
+///
+/// ## Example
+/// ```
+/// let query = "to";
+/// let contents = "\
+///     To here\n\
+///     but not there.\n\
+///     here to there.";
+///
+/// assert_eq!(vec!["here to there."], minigrep::search(query, &contents));
+/// ```
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     contents
         .lines()
@@ -55,6 +86,19 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
         .collect()
 }
 
+/// Searches for the query in contents with case insensitivity.
+///
+/// ## Example
+/// ```
+/// let query = "tO";
+/// let contents = "\
+///     To here\n\
+///     but not there.\n\
+///     here to there.";
+///
+/// assert_eq!(vec!["To here", "here to there."],
+///     minigrep::search_case_insensitive(query, &contents));
+/// ```
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     let query = query.to_lowercase();
 
